@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>React - Template</title>
+    <link rel="stylesheet" type="text/css" href="../../css/main.css"/>
+    <script src="../../js/react.min.js"></script>
+    <script src="../../js/react-dom.min.js"></script>
+    <script src="../../js/browser.min.js"></script>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script type="text/babel">
+
+    class Comment extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {editing: false};
+            this.edit = this.edit.bind(this);
+            this.save = this.save.bind(this);
+            this.remove = this.remove.bind(this);
+        }
+
+        edit() {
+            this.setState({editing: true})
+        }
+
+        remove() {
+            this.props.deleteFromBoard(this.props.index)
+        }
+
+        save() {
+            this.props.updateCommentText(this.refs.newText.value,
+                this.props.index);
+            this.setState({editing: false})
+        }
+
+        renderNormal() {
+            return (
+                <div className="commentContainer">
+                    <div className="commentText">{this.props.children}</div>
+                    <button onClick={this.edit} className="button-primary">Edit</button>
+                    <button onClick={this.remove} className="button-danger">Remove</button>
+                </div>
+            )
+        }
+
+        renderForm() {
+            return (
+                <div className="commentContainer">
+                    <textarea ref="newText" defaultValue={this.props.children}></textarea>
+                    <div className="commentText">{this.props.children}</div>
+                    <button onClick={this.save} className="button-success">Save</button>
+                </div>
+            )
+        }
+
+        render() {
+            if (this.state.editing) {
+                return this.renderForm();
+            } else {
+                return this.renderNormal();
+            }
+        }
+
+    }
+
+    class Board extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                comments: []
+            };
+            this.addComment = this.addComment.bind(this);
+            this.removeComment = this.removeComment.bind(this);
+            this.updateComment = this.updateComment.bind(this);
+        }
+
+        addComment(text) {
+            var arr = this.state.comments;
+            arr.push(text);
+            this.setState({comments: arr});
+        }
+
+        removeComment(i) {
+            var arr = this.state.comments;
+            arr.splice(i, 1);
+            this.setState({comments: arr});
+        }
+
+        updateComment(newText, i) {
+            var arr = this.state.comments;
+            arr[i] = newText;
+            this.setState({comments: arr});
+        }
+
+        eachComment(text, i) {
+            return (
+                <Comment key={i} index={i}
+                         updateCommentText={this.updateComment}
+                         deleteFromBoard={this.removeComment}>
+                    {text}
+                </Comment>
+            )
+        }
+
+        render() {
+            return (
+                <div>
+                    <button onClick={() => this.addComment('James')} className="button-info create">Add New</button>
+                    <div className="board">
+                        {
+                            this.state.comments.map(this.eachComment, this)
+                        }
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    ReactDOM.render(
+        <Board/>,
+        document.getElementById('container')
+    );
+</script>
+
+</body>
+</html>
